@@ -38,6 +38,7 @@ A simple **Employee Attendance Management System** built with **ReactJS**, **Nod
 
 ## 🗂️ MongoDB Schema
 
+
 ### **User Schema**
 ```javascript
 const mongoose = require('mongoose');
@@ -55,8 +56,8 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 module.exports = User;
-
-### 📅 Attendance Schema (MongoDB - Mongoose)
+```
+## 📅 Attendance Schema (MongoDB - Mongoose)
 
 ```javascript
 const mongoose = require('mongoose');
@@ -70,3 +71,4 @@ const attendanceSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 module.exports = mongoose.model('Attendance', attendanceSchema);
+
