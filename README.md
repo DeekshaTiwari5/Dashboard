@@ -52,6 +52,7 @@ const userSchema = new mongoose.Schema({
     profileImage: String,
     resetOtp: String,
     otpExpiry: Date,
+    employeeId: { type: String, required: true, unique: true ,default: "415469" },
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
