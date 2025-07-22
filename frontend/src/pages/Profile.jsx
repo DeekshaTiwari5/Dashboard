@@ -9,7 +9,7 @@ function Profile() {
   const [user, setUser] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
   const fileInputRef = useRef(null);
-   const navigate = useNavigate(); // ADD THIS HOOK
+   const navigate = useNavigate();
 
   const handleRedirectAttendance = () => {
     navigate("/attendance",{ state: { refresh: true } });
@@ -20,7 +20,7 @@ function Profile() {
   useEffect(() => {
     const fetchData = async () => {
         try {
-            const res = await api.get("/auth/me", {
+            const res = await api.get("/attendance/me", {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             const userData = res.data;
@@ -28,9 +28,10 @@ function Profile() {
 
             setUser({
                 ...userData,
-                checkInTime: attendance?.checkIn ? new Date(attendance.checkIn).toLocaleTimeString() : "-",
-                checkTime: attendance?.updatedAt ? new Date(attendance.updatedAt).toLocaleTimeString() : "-",
-                duration: calculateDuration(attendance?.checkIn, attendance?.updatedAt),
+checkInTime: attendance?.checkIn ? new Date(attendance.checkIn).toLocaleTimeString() : "-",
+checkTime: attendance?.checkOut ? new Date(attendance.checkOut).toLocaleTimeString() : "-",
+duration: calculateDuration(attendance?.checkIn, attendance?.checkOut),
+
             });
         } catch (error) {
             console.error("Fetch user or attendance failed", error);
@@ -135,9 +136,9 @@ const calculateDuration = (start, end) => {
             <tbody>
               <tr>
                 <td>{user.employeeId || "415469"}</td>
-<td>{user.checkInTime || "-"}</td>
-<td>{user.checkTime || "-"}</td>
-<td>{user.duration || "-"}</td>
+<td>{user.checkInTime || "08:30 am"}</td>
+<td>{user.checkTime || "7h 45m"}</td>
+<td>{user.duration || "8h 30m"}</td>
 
               </tr>
             </tbody>
