@@ -126,3 +126,8 @@
   top: 25%;
   left: 10%;
 }
+@media screen and (max-width: 768px) {
+  .clock{
+        transform: translate(0%, 0%);
+  }
+}
