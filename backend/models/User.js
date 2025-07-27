@@ -6,11 +6,11 @@ const userSchema = new mongoose.Schema({
     mobile: { type: String, required: true },
     password: { type: String, required: true },
     isVerified: { type: Boolean, default: false },
-    employeeId: { type: String, required: true, unique: true ,default: "415469" },
+    employeeId: { type: Number, required: true, unique: true},
 
     profileImage: String,
     resetOtp: String,
-otpExpiry: Date,
+    otpExpiry: Date,
 
 }, { timestamps: true });
 

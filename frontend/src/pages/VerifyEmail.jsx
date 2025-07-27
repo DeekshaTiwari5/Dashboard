@@ -8,8 +8,9 @@ function VerifyEmail() {
 
     useEffect(() => {
         const verifyEmail = async () => {
-            try {
-                await axios.get(`https://dashboard-4cy7.onrender.com/api/auth/verify/${token}`);
+            try { await axios.get(`${process.env.REACT_APP_API_URL}/auth/verify/${token}`);
+            
+               
                 alert("✅ Email verified successfully!");
                 navigate("/login");
             } catch (error) {

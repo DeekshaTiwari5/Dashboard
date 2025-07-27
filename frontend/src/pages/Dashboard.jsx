@@ -1,38 +1,61 @@
 import React, { useEffect, useState } from "react";
-import api from "../../src/services/api";
+// import api from "../../src/services/api";
 import "../App.css";
-import { useUser } from "../context/UserContext";
+import Pagination from "../components/Pagination";
 import { IoSearchOutline } from "react-icons/io5";
+import axios from "axios";
 
 function Dashboard() {
-  const { attendance, setAttendance } = useUser();
+  const [page, setPage] = useState(1);
 
-  const fetchAttendance = async () => {
-  try {
-    const response = await api.get("/attendance", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
+  const [attendanceData, setAttendanceData] = useState([]);
+  const itemsPerPage = 10;
+  const paginatedData = attendanceData.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
 
-    console.log("Attendance API Response:", response.data);
-    setAttendance(response.data);
-  } catch (error) {
-    console.error("Fetch Attendance Error:", error);
-  }
-};
+  const getAttendance = async () => {
+    console.log({ getAttendance });
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/attendance`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("✅ Attendance fetched:");
+      console.table(
+        res.data.map((item) => ({
+          Date: item.date,
+          Name: item.userId?.name || "Not populated",
+          EmpCode: item.userId?.employeeId || "Not populated",
+          CheckIn: item.checkIn,
+        }))
+      );
+
+      setAttendanceData(res.data);
+    } catch (error) {
+      console.error("❌ Attendance fetch error:", error);
+    }
+  };
 
   useEffect(() => {
-    fetchAttendance();
+    getAttendance();
   }, []);
+
   return (
-    <div className="page-container">
+    <div className="page-container dashboard">
       <div className="header-green">
         <h2>Dashboard</h2>
-        <div className="searchbar">
-          {" "}
-          <IoSearchOutline />
-        </div>
+        <div className="search">
+          <div className="searchbar">
+            {" "}
+            <IoSearchOutline />
+          </div>
 
-        <input placeholder="       Search by date"></input>
+          <input className="searchinput" placeholder=" Search by date"></input>
+        </div>
       </div>
 
       <table className="dashboard-table">
@@ -46,11 +69,15 @@ function Dashboard() {
           </tr>
         </thead>
         <tbody>
-          {attendance.map((item, index) => (
+          {paginatedData.map((item, index) => (
             <tr key={index}>
-              <td>{new Date(item.date).toLocaleDateString()}</td>
-              <td>{item.userId?.name || "-"}</td>
-            <td>{item.userId?.employeeId || "-"}</td>
+              <td>
+                {new Date(item.date)
+                  .toLocaleString("en-US", { month: "long", day: "2-digit" })
+                  .replace(",", "")}
+              </td>
+              <td>{item.userId?.name}</td>
+              <td>{item.userId?.employeeId}</td>
 
               <td>
                 {item.checkIn
@@ -63,6 +90,13 @@ function Dashboard() {
           ))}
         </tbody>
       </table>
+      {attendanceData.length > 10 && (
+        <Pagination
+          currentPage={page}
+          totalPages={Math.ceil(attendanceData.length / 10)}
+          onPageChange={(newPage) => setPage(newPage)}
+        />
+      )}
     </div>
   );
 }

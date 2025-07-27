@@ -19,6 +19,7 @@ function Attendance() {
     } catch (error) {
         console.log("Check-In Error:", error.response?.data || error.message);
         alert(error.response?.data?.message || "Error occurred");
+         navigate("/profile");
     }
 };
 

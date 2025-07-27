@@ -36,16 +36,20 @@ function ForgotPassword() {
             <h2>Forgot Password</h2>
             {step === 1 ? (
                 <>
-                    <input
+                <div className="form">
+                     <input
                         placeholder="Enter your email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
                     <button onClick={sendOtp}>Send OTP</button>
+                </div>
+                   
                 </>
             ) : (
                 <>
-                    <input
+                <div className="form">
+  <input
                         placeholder="OTP"
                         value={otp}
                         onChange={(e) => setOtp(e.target.value)}
@@ -57,6 +61,8 @@ function ForgotPassword() {
                         onChange={(e) => setNewPassword(e.target.value)}
                     />
                     <button onClick={resetPassword}>Reset Password</button>
+                </div>
+                  
                 </>
             )}
         </div>

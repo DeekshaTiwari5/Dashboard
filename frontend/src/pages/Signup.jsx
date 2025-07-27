@@ -5,6 +5,7 @@ import "../App.css";
 
 function Signup() {
     const navigate = useNavigate();
+    
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -34,7 +35,7 @@ function Signup() {
     };
 
     return (
-        <div className="page-container">
+        <div className="page-container signup">
             <h2>Signup</h2>
             <form onSubmit={handleSubmit}>
                 <input

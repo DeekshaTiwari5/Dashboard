@@ -11,7 +11,7 @@ function Header() {
 
     return (
         <div className="header-green" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 20px" }}>
-            <div style={{ fontWeight: "bold" }}>OMPL</div>
+
             <div style={{ display: "flex", gap: "20px" }}>
                 <Link to="/dashboard" style={{ color: "white", textDecoration: "none" }}>Dashboard</Link>
                 <Link to="/attendance" style={{ color: "white", textDecoration: "none" }}>Attendance</Link>

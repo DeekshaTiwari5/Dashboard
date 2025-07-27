@@ -2,68 +2,82 @@ const Attendance = require("../models/Attendance");
 
 // 📥 Check In API
 exports.checkIn = async (req, res) => {
-    try {
-        const userId = req.user.id; // Assuming you use auth middleware to set req.user
-        const today = new Date().toISOString().split('T')[0];
+  try {
+    const userId = req.user.id;
+    const today = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
 
-        let attendance = await Attendance.findOne({ userId, date: today });
-        if (attendance && attendance.checkIn) {
-            return res.status(400).json({ message: "Already checked in today." });
-        }
+    // Check if user already checked in today
+    const existing = await Attendance.findOne({ userId, date: today });
 
-        if (!attendance) {
-            attendance = new Attendance({
-                userId,
-                date: today,
-                checkIn: new Date(),
-            });
-        } else {
-            attendance.checkIn = new Date();
-        }
-
-        await attendance.save();
-        res.status(200).json({ message: "Checked in successfully.", attendance });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal Server Error" });
+    if (existing && existing.checkIn) {
+      return res
+        .status(400)
+        .json({ message: "You have already checked in today." });
     }
+
+    if (existing) {
+      existing.checkIn = new Date();
+      await existing.save();
+      return res
+        .status(200)
+        .json({ message: "Checked in successfully", data: existing });
+    }
+
+    const newAttendance = new Attendance({
+      userId,
+      date: today,
+      checkIn: new Date(),
+    });
+
+    await newAttendance.save();
+    return res
+      .status(200)
+      .json({ message: "Checked in successfully", data: newAttendance });
+  } catch (error) {
+    res.status(500).json({ message: "Check-in failed", error });
+  }
 };
 
 // 📤 Check Out API
 exports.checkOut = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const today = new Date().toISOString().split('T')[0];
+  try {
+    const userId = req.user.id;
+    const today = new Date().toISOString().split("T")[0];
 
-        const attendance = await Attendance.findOne({ userId, date: today });
-        if (!attendance || !attendance.checkIn) {
-            return res.status(400).json({ message: "Check-in required before check-out." });
-        }
+    const existing = await Attendance.findOne({ userId, date: today });
 
-        attendance.checkOut = new Date();
-
-        // Calculate duration
-        const durationMs = new Date(attendance.checkOut) - new Date(attendance.checkIn);
-        const hours = Math.floor(durationMs / (1000 * 60 * 60));
-        const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-        attendance.duration = `${hours} hours ${minutes} minutes`;
-
-        await attendance.save();
-        res.status(200).json({ message: "Checked out successfully.", attendance });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal Server Error" });
+    if (!existing || !existing.checkIn) {
+      return res.status(400).json({ message: "You haven't checked in yet." });
     }
+
+    if (existing.checkOut) {
+      return res
+        .status(400)
+        .json({ message: "You have already checked out today." });
+    }
+
+    existing.checkOut = new Date();
+    await existing.save();
+
+    res
+      .status(200)
+      .json({ message: "Checked out successfully", data: existing });
+  } catch (error) {
+    res.status(500).json({ message: "Check-out failed", error });
+  }
 };
 
-// 📄 Get All Attendance Records
-exports.getAttendance = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const attendanceRecords = await Attendance.find({ userId }).sort({ date: -1 });
-        res.status(200).json(attendanceRecords);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal Server Error" });
-    }
+// 📄 Get all attendance records with user name and employeeId
+exports.getAllAttendance = async (req, res) => {
+  try {
+    const attendance = await Attendance.find().populate(
+      "userId",
+      "name employeeId"
+    ); // populate only required fields
+    res.status(200).json(attendance);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch attendance", error: err.message });
+  }
 };

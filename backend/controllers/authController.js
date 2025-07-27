@@ -6,9 +6,10 @@ const nodemailer = require('nodemailer');
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // Nodemailer Email Send
-const sendVerificationMail = async (email, userId) => {
-    const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    const url = `http://localhost:3000/verify/${token}`;
+    const sendVerificationMail = async (email, userId) => {
+     const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '1d' });
+     const url = `${process.env.FRONTEND_BASE_URL}/verify/${token}`;
+
 
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
@@ -20,12 +21,12 @@ const sendVerificationMail = async (email, userId) => {
         },
     });
 
-    console.log('Attempting to send email to:', email);
+    console.log(' to send email to:', email);
 
     try {
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
-            to: "tdeeksha617@gmail.com",
+            to: email,
             subject: 'Email Verification',
             html: `<h4>Verify your email</h4><p><a href="${url}">${url}</a></p>`,
         });
@@ -35,15 +36,35 @@ const sendVerificationMail = async (email, userId) => {
     }
 };
 
+// Generates a unique 6-digit employee ID
+const generateEmployeeId = async () => {
+  let unique = false;
+  let id;
 
+  while (!unique) {
+    id = Math.floor(100000 + Math.random() * 900000); // 6-digit number
+    const existing = await User.findOne({ employeeId: id });
+    if (!existing) unique = true;
+  }
+
+  return id;
+};
 // Signup
 exports.signup = async (req, res) => {
     try {
         console.log('Signup Request Body:', req.body);
         const { name, email, mobile, password } = req.body;
 
-        if (!name || !email || !mobile || !password) {
+        // ✅ Await the async function
+        const employeeId = await generateEmployeeId();
+
+        if (!name || !email || !mobile || !password || !employeeId) {
             return res.status(400).json({ error: 'All fields are required.' });
+        }
+
+        const existingUser = await User.findOne({ $or: [{ email }, { mobile }] });
+        if (existingUser) {
+            return res.status(400).json({ error: 'User already exists.' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -53,8 +74,10 @@ exports.signup = async (req, res) => {
             email,
             mobile,
             password: hashedPassword,
+            employeeId,
             isVerified: false,
         });
+
         await user.save();
         await sendVerificationMail(email, user._id);
 
@@ -65,16 +88,22 @@ exports.signup = async (req, res) => {
     }
 };
 
-
 // Email Verification
 exports.verifyEmail = async (req, res) => {
     try {
         const { token } = req.params;
-        const decoded = jwt.verify(token, JWT_SECRET);
-        await User.findByIdAndUpdate(decoded.id, { isVerified: true });
-        res.status(200).send('<h3>Email verified successfully. You can now <a href="http://localhost:3000/login">Login</a></h3>');
-    } catch (error) {
-        res.status(400).send('<h3>Invalid or expired token.</h3>');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const user = await User.findById(decoded.id);
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        user.isVerified = true; // ✅ Mark user as verified
+        await user.save();
+
+        res.status(200).json({ message: "Email verified successfully" });
+    } catch (err) {
+        console.error(err);
+        res.status(400).json({ error: "Invalid or expired token" });
     }
 };
 
@@ -115,7 +144,7 @@ exports.login = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-// controllers/authController.js
+
 exports.sendOtpForPasswordReset = async (req, res) => {
     const { email } = req.body;
     const user = await User.findOne({ email });
@@ -140,7 +169,7 @@ exports.sendOtpForPasswordReset = async (req, res) => {
 
     await transporter.sendMail({
         from: process.env.EMAIL_USER,
-        to: 'tdeeksha617@gmail.com',
+        to: email,
         subject: 'Reset Password OTP',
         html: `<h4>Your OTP: ${otp}</h4>`,
     });
@@ -179,12 +208,13 @@ exports.updateProfile = async (req, res) => {
     }
 };
 
-// Get User Info for Dashboard
-exports.getUserInfo = async (req, res) => {
-    try {
-        const user = await User.findById(req.user.id).select('-password');
-        res.status(200).json(user);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-};
+// // Get User Info for Dashboard
+// exports.getUserInfo = async (req, res) => {
+//     try {
+//         const user = await User.findById(req.user.id).select('-password');
+//         res.status(200).json(user);
+//     } catch (error) {
+//         res.status(400).json({ error: error.message });
+//     }
+// };
+
