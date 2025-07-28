@@ -8,7 +8,8 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Nodemailer Email Send
     const sendVerificationMail = async (email, userId) => {
      const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '1d' });
-     const url = `${process.env.FRONTEND_BASE_URL}/verify/${token}`;
+    //  const url = `${process.env.FRONTEND_BASE_URL}/verify/${token}`;
+     const url = `${process.env.FRONTEND_BASE_URL}`;
 
 
     const transporter = nodemailer.createTransport({
