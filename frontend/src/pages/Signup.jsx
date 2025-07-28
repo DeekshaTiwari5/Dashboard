@@ -30,7 +30,7 @@ function Signup() {
         } catch (err) {
             console.log(err.response?.data?.message);
             
-            alert(err.response?.data?.message || "Something went wrong!");
+            alert(err.response?.data?.message || "Duplicate User!");
         }
     };
 

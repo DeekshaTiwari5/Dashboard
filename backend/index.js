@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
 
+
 // Ensure 'uploads/' directory exists
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -18,6 +19,11 @@ const attendanceRoutes = require('./routes/attendanceRoutes');
 const profileRoutes = require('./routes/profileRoutes'); // ✅ Add this
 
 const app = express();
+app.use(cors({
+    origin: 'https://dashboard-1-61ot.onrender.com', // e.g., 'https://your-react-app.onrender.com'
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Or specify what you need
+    credentials: true // If you're sending cookies/auth headers
+}));
 
 // Middlewares
 app.use(cors());
