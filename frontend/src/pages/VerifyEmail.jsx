@@ -8,9 +8,9 @@ function VerifyEmail() {
 
     useEffect(() => {
         const verifyEmail = async () => {
-            try { await axios.get(`${process.env.REACT_APP_API_URL}/auth/verify/${token}`);
+            // try { await axios.get(`${process.env.REACT_APP_API_URL}/auth/verify/${token}`);
             
-               
+                  try { await axios.get(`${process.env.REACT_APP_API_URL}`);
                 alert("✅ Email verified successfully!");
                 navigate("/login");
             } catch (error) {
